@@ -75,12 +75,39 @@ void render2DTree(Node* node, pcl::visualization::PCLVisualizer::Ptr& viewer, Bo
 
 }
 
+void proximity(const std::vector<std::vector<float>>& points, std::vector<int>& cluster, std::vector<std::vector<float>> &proc_points, int id, KdTree* tree, float distanceTol){
+	// Mark the point as processed
+	proc_points[id] = true;
+	// Add point to cluster
+	cluster.push_back(id);
+	// Find nearby points
+	std::vector<int> nearby_points = tree->search(points[id], distanceTol);
+
+	for (int nid : nearby_points){
+		if (!proc_points[nid]){
+			proximity(points, cluster, proc_points, nid, tree, distanceTol);
+		}
+	}
+}
+
 std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
 {
-
-	// TODO: Fill out this function to return list of indices for each cluster
-
+	// Create a list of indices of points close to each other (or clusters)
 	std::vector<std::vector<int>> clusters;
+
+	// Create vector of processed booleans
+	std::vector<bool> processed(points.size(), false);
+
+	for (int id =0; id < points.size(); id++){
+		// 	Check if the point has been processed
+		if (!processed[id]){
+			// Search the tree
+			std::vector<int> cluster;
+			proximity(points, cluster, proc_points, id, tree, distanceTol);
+			clusters.push_back(cluster);
+		}
+	}
+
  
 	return clusters;
 
@@ -101,7 +128,7 @@ int main ()
 
 	// Create data
 	std::vector<std::vector<float>> points = { {-6.2,7}, {-6.3,8.4}, {-5.2,7.1}, {-5.7,6.3}, {7.2,6.1}, {8.0,5.3}, {7.2,7.1}, {0.2,-7.1}, {1.7,-6.9}, {-1.2,-7.2}, {2.2,-8.9} };
-	//std::vector<std::vector<float>> points = { {-6.2,7}, {-6.3,8.4}, {-5.2,7.1}, {-5.7,6.3} };
+	// std::vector<std::vector<float>> points = { {-6.2,7}, {-6.3,8.4}, {-5.2,7.1}, {-5.7,6.3} };
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = CreateData(points);
 
 	KdTree* tree = new KdTree;
