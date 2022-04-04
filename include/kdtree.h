@@ -49,9 +49,10 @@ struct KdTree
     	}
 		else{
 			// Check the current depth of the tree
-			// If 0, then even, we check x points
-			// If 1, then odd, we check y points
-			int cd = depth % 2;
+			// If 0,  we check x points
+			// If 1,  we check y points
+			// If 2,  we check z points
+			int cd = depth % 3;
 			if (point[cd] < node->point[cd]){
 				insertRecursive(node->left, point, id, depth+1);
 			}else{
@@ -70,19 +71,19 @@ struct KdTree
 
 	void searchRecursive(std::vector<float> target, Node* node, int depth, float distanceTol, std::vector<int>& ids){
 		if (node !=NULL){
-			if( (node->point[0] >=(target[0]-distanceTol)&&node->point[0]<=(target[0]+distanceTol)) && (node->point[1] >=(target[1]-distanceTol)&&node->point[1]<=(target[1]+distanceTol)))
+			if( (node->point[0] >=(target[0]-distanceTol)&&node->point[0]<=(target[0]+distanceTol)) && (node->point[1] >=(target[1]-distanceTol)&&node->point[1]<=(target[1]+distanceTol)) && (node->point[2] >=(target[2]-distanceTol)&&node->point[2]<=(target[2]+distanceTol)))
 			{
-				float d = sqrt(pow(target[0] - node->point[0], 2.0) + pow(target[1] - node->point[1], 2.0));
+				float d = sqrt(pow(target[0] - node->point[0], 2.0) + pow(target[1] - node->point[1], 2.0) + pow(target[2] - node->point[2], 2.0));
 				if(d <= distanceTol){
 					ids.push_back(node->id);
 				}
 			}
 			// Check the left nodes 
-			if (target[depth%2]-distanceTol<node->point[depth%2]){
+			if (target[depth%3]-distanceTol<node->point[depth%3]){
 				searchRecursive(target, node->left, depth+1, distanceTol, ids);
 			}
 			//Check the right nodes
-			if (target[depth%2]+distanceTol>node->point[depth%2]){
+			if (target[depth%3]+distanceTol>node->point[depth%3]){
 				searchRecursive(target, node->right, depth+1, distanceTol, ids);
 			}
 		}
